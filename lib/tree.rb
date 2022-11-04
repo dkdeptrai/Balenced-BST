@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'node'
-
+# rubocop:disable ClassLength
 # My balanced binary tree
 class Tree
   attr_accessor :root
@@ -74,7 +74,7 @@ class Tree
   def level_order
     queue = [@root]
     result = []
-    
+
     until queue.empty?
       node = queue.shift
       block_given? ? yield(node.value) : result << node.value
@@ -116,10 +116,31 @@ class Tree
     return res unless block_given?
   end
 
-  def height(target, node = root, cur_height = 0)
-    return cur_height if target == node
-    return cur_height - 1 if node.nil?
+  def depth(target, node = root, cur_depth = 0)
+    return cur_depth if target == node
+    return cur_depth - 1 if target.nil? || node.nil?
 
-    [height(target, node.left_child, cur_height + 1), height(target, node.right_child, cur_height + 1)].max
+    [depth(target, node.left_child, cur_depth + 1), depth(target, node.right_child, cur_depth + 1)].max
+  end
+
+  def height(node, cur_height = 0)
+    return -1 if node.nil?
+    return cur_height if node.leaf?
+
+    [height(node.left_child, cur_height + 1), height(node.right_child, cur_height + 1)].max
+  end
+
+  def balanced?(node = root)
+    return false if node.nil?
+    return true if (height(node.left_child) - height(node.right_child)).abs <= 1
+
+    balanced?(node.left_child) && balanced?(node.right_child)
+  end
+
+  def rebalence
+    arr = []
+    inorder { |val| arr << val }
+    @root = build_tree(arr)
   end
 end
+# rubocop:enable ClassLength
